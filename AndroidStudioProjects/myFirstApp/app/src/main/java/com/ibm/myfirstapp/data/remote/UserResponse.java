@@ -1,6 +1,6 @@
 package com.ibm.myfirstapp.data.remote;
 
-public class Response {
+public class UserResponse {
 
     private Long id;
     private String name;
