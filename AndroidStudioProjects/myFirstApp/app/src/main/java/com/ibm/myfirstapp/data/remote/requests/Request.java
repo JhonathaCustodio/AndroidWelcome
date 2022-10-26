@@ -1,6 +1,6 @@
 package com.ibm.myfirstapp.data.remote.requests;
 
-public class InsertUserRequest {
+public class Request {
 
     private String name;
     private String email;

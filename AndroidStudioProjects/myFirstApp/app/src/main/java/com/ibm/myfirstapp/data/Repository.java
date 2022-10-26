@@ -22,10 +22,10 @@ public class Repository {
                     .build();
         }
 
-        public static WelcomeBoardService service(){
+        public static WelcomeBoardService welcomeBoardService(){
 
             WelcomeBoardService service = getRetrofit().create(WelcomeBoardService.class);
             return service;
         }
     }
-}
+

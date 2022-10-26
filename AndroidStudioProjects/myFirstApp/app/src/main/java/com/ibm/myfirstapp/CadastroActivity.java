@@ -2,7 +2,6 @@ package com.ibm.myfirstapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -10,17 +9,27 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.ibm.myfirstapp.data.Repository;
+import com.ibm.myfirstapp.data.remote.Response;
+import com.ibm.myfirstapp.data.remote.requests.Request;
+import com.ibm.myfirstapp.data.remote.services.WelcomeBoardService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+
 public class CadastroActivity extends AppCompatActivity {
+
+        EditText etEmail, etSenha, etSenhaConfirma, etNome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
 
-        EditText etEmail = findViewById(R.id.editTextEmail);
-        EditText etSenha = findViewById(R.id.editTextSenha);
-        EditText etSenhaConfirma = findViewById(R.id.editTextSenhaConfirma);
-        EditText etNome = findViewById(R.id.editTextNome);
+        etEmail = findViewById(R.id.editTextEmail);
+        etSenha = findViewById(R.id.editTextSenha);
+        etSenhaConfirma = findViewById(R.id.editTextSenhaConfirma);
+        etNome = findViewById(R.id.editTextNome);
 
         etEmail.setText(getIntent().getStringExtra("KeyEmail"));
         etSenha.setText(getIntent().getStringExtra("KeySenha"));
@@ -44,15 +53,9 @@ public class CadastroActivity extends AppCompatActivity {
                             "Digite seu nome",
                             Toast.LENGTH_LONG).show();
                 }else if ( senha.equals(senhaConfirma)){
-                    //ir para a tela surpresa
+                    saveUser(createRequest());
 
-                    SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
-                    SharedPreferences.Editor myEdit = sharedPreferences.edit();
 
-                    myEdit.putString("email", email);
-                    myEdit.putString("senha", senha);
-                    myEdit.putString("nome", nome);
-                    myEdit.commit();
 
                     finish();
 
@@ -65,6 +68,41 @@ public class CadastroActivity extends AppCompatActivity {
             }
         });
     }
+
+    public Request createRequest(){
+        Request request = new Request();
+
+        request.setName(etNome.getText().toString());
+        request.setEmail(etEmail.getText().toString());
+        request.setPassword(etSenha.getText().toString());
+
+        return request;
+    }
+
+    public void saveUser(Request request){
+
+        Call<Response> responseCall = Repository.welcomeBoardService().saveUser(request);
+        responseCall.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                if(response.isSuccessful()){
+                    Toast.makeText(getApplicationContext(), "cadastrado com sucesso", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(), "email cadastrado", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Response> call, Throwable t) {
+
+                Toast.makeText(getApplicationContext(), "falha no cadastro", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+    }
+
+
 
     private void alerta(String msg){
 
