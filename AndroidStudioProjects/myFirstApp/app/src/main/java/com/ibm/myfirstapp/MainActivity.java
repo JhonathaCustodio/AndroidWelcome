@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                     if(TextUtils.isEmpty(emailLogin) || TextUtils.isEmpty(senhaLogin)){
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("ATENÇÃO!")
-                                .setMessage("Preencha todos os campos!")
+                                .setMessage("Preencha todos os campos ou realize seu cadastro!")
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
                                     @Override

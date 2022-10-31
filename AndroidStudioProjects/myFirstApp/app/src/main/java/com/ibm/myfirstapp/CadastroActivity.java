@@ -1,5 +1,6 @@
 package com.ibm.myfirstapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 
@@ -37,6 +38,7 @@ public class CadastroActivity extends AppCompatActivity {
         Button btnCadastrar = findViewById(R.id.btnCadastrar);
 
         btnCadastrar.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
 
@@ -78,6 +80,7 @@ public class CadastroActivity extends AppCompatActivity {
 
         Call<UserResponse> responseCall = Repository.welcomeBoardService().saveUser(request);
         responseCall.enqueue(new Callback<UserResponse>() {
+
             @Override
             public void onResponse(Call<UserResponse> call, retrofit2.Response<UserResponse> response) {
                 if(response.isSuccessful()){
