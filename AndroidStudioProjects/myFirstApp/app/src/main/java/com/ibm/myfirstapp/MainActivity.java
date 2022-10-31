@@ -3,6 +3,7 @@ package com.ibm.myfirstapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -16,27 +17,25 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ibm.myfirstapp.data.Repository;
 import com.ibm.myfirstapp.data.remote.UserResponse;
-import com.ibm.myfirstapp.data.remote.requests.LoginUser;
+import com.ibm.myfirstapp.data.remote.requests.UserLogin;
 
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
 public class MainActivity extends AppCompatActivity {
 
-        private EditText editeEmail, editeSenha;
-        String email, senha;
-
+        private EditText etEmail, etPassword;
+        String emailLogin, senhaLogin;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
-            editeEmail = findViewById(R.id.etEmail);
-            editeSenha = findViewById(R.id.etPassword);
+            etEmail = findViewById(R.id.etEmail);
+            etPassword = findViewById(R.id.etPassword);
             Button botao = findViewById(R.id.botao);
             TextView txCadastro = findViewById(R.id.txCadastro);
 
@@ -45,11 +44,10 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
 
-                    email = editeEmail.getText().toString();
-                    senha = editeSenha.getText().toString();
+                    emailLogin = etEmail.getText().toString();
+                    senhaLogin = etPassword.getText().toString();
 
-
-                    if(TextUtils.isEmpty(email) || TextUtils.isEmpty(senha)){
+                    if(TextUtils.isEmpty(emailLogin) || TextUtils.isEmpty(senhaLogin)){
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("ATENÇÃO!")
                                 .setMessage("Preencha todos os campos!")
@@ -61,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                                 }).setIcon(android.R.drawable.ic_delete)
                                 .show();
                     }else {
-                        login(email, senha);
+                        login(emailLogin, senhaLogin);
                     }
                 }
             });
@@ -75,17 +73,18 @@ public class MainActivity extends AppCompatActivity {
             });
 
         }
-        public void login(String email2, String password){
+        public void login(String email, String password){
 
-            Call<UserResponse> registerResponseCall = Repository.welcomeBoardService().loginUser(new LoginUser(email2, password));
+            Call<UserResponse> registerResponseCall = Repository.welcomeBoardService().loginUser(new UserLogin(email, password));
 
             registerResponseCall.enqueue(new Callback <UserResponse>() {
                 @Override
                 public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                     if(response.isSuccessful()){
-                        if (email.equals(response.body().getEmail()) && senha.equals(response.body().getPassword())){
+                        if (emailLogin.equals(response.body().getEmail()) && senhaLogin.equals(response.body().getPassword())){
                             Intent intent = new Intent(MainActivity.this, MenuActivity.class);
-                            intent.putExtra("email", email);
+                            String name = response.body().getName();
+                            intent.putExtra("name", name);
                             Toast.makeText(getApplicationContext(), "login realizado com sucesso!", Toast.LENGTH_SHORT).show();
                             startActivity(intent);
 
@@ -106,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         private void dialog(){
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle("ATENÇÃO!")
-                    .setMessage("Email ou senha incorretos!")
+                    .setMessage("Realize seu cadastro!")
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
                         @Override
@@ -115,4 +114,4 @@ public class MainActivity extends AppCompatActivity {
                     }).setIcon(android.R.drawable.ic_delete)
                     .show();
         }
-    }
+}

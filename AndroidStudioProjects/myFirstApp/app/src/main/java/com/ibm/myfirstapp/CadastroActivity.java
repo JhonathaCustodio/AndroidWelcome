@@ -10,7 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import com.ibm.myfirstapp.data.Repository;
 import com.ibm.myfirstapp.data.remote.UserResponse;
-import com.ibm.myfirstapp.data.remote.requests.Request;
+import com.ibm.myfirstapp.data.remote.requests.UserRequest;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -64,8 +64,8 @@ public class CadastroActivity extends AppCompatActivity {
         });
     }
 
-    public Request createRequest(){
-        Request request = new Request();
+    public UserRequest createRequest(){
+        UserRequest request = new UserRequest();
 
         request.setName(etNome.getText().toString());
         request.setEmail(etEmail.getText().toString());
@@ -74,7 +74,7 @@ public class CadastroActivity extends AppCompatActivity {
         return request;
     }
 
-    public void saveUser(Request request){
+    public void saveUser(UserRequest request){
 
         Call<UserResponse> responseCall = Repository.welcomeBoardService().saveUser(request);
         responseCall.enqueue(new Callback<UserResponse>() {
