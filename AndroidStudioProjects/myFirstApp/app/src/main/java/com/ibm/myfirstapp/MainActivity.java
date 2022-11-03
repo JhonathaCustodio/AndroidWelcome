@@ -2,92 +2,115 @@ package com.ibm.myfirstapp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity
-{
 
-    private String email, senha, nome;
+import com.ibm.myfirstapp.data.Repository;
+import com.ibm.myfirstapp.data.remote.UserResponse;
+import com.ibm.myfirstapp.data.remote.requests.LoginUser;
+
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class MainActivity extends AppCompatActivity {
+
+    private EditText etEmail, etPassword;
+    String emailLogin, senhaLogin;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EditText etEmail, etPassword;
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-
-
         Button botao = findViewById(R.id.botao);
+        TextView txCadastro = findViewById(R.id.txCadastro);
+
         botao.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
 
-                email = etEmail.getText().toString();
-                senha = etPassword.getText().toString();
+                emailLogin = etEmail.getText().toString();
+                senhaLogin = etPassword.getText().toString();
 
+                if(TextUtils.isEmpty(emailLogin) || TextUtils.isEmpty(senhaLogin)){
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("ATENÇÃO!")
+                            .setMessage("Preencha todos os campos!")
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-                SharedPreferences pref = getSharedPreferences("MySharedPref", MODE_PRIVATE);
-                String emailShared = pref.getString("email",null);
-                String senhaShared = pref.getString("senha",null);
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            }).setIcon(android.R.drawable.ic_delete)
+                            .show();
+                }else {
+                    login(emailLogin, senhaLogin);
+                }
+            }
+        });
 
+        txCadastro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, CadastroActivity.class);
+                startActivity(intent);
+            }
+        });
 
-                if(email.isEmpty() || senha.isEmpty()){
-                    Toast.makeText(getApplicationContext(),
-                            "Entre com um email e senha de sua preferencia para o cadastro",
-                            Toast.LENGTH_LONG).show();
-                } else if (email.equals(emailShared) && senha.equals(senhaShared)) {
+    }
+    public void login(String email, String password){
 
-                    Intent intent = new Intent(MainActivity.this, MenuActivity.class);
-                    intent.putExtra("KeyEmail", email);
-                    intent.putExtra("KeySenha", senha);
-                    intent.putExtra("KeyNome", nome);
-                    startActivity(intent);
+        Call<UserResponse> registerResponseCall = Repository.welcomeBoardService().loginUser(new LoginUser(email, password));
 
-                } else {
+        registerResponseCall.enqueue(new Callback <UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                if(response.isSuccessful()){
+                    if (emailLogin.equals(response.body().getEmail()) && senhaLogin.equals(response.body().getPassword())){
+                        Intent intent = new Intent(MainActivity.this, MenuActivity.class);
+                        String name = response.body().getName();
+                        intent.putExtra("name", name);
+                        Toast.makeText(getApplicationContext(), "login realizado com sucesso!", Toast.LENGTH_SHORT).show();
+                        startActivity(intent);
+
+                        //mensagem de usuario nao existente
+                    }
+                }else  {
                     dialog();
                 }
             }
-
-            private void dialog() {
-                new android.app.AlertDialog.Builder(MainActivity.this)
-                        .setTitle("ATENÇÃO")
-                        .setMessage("Você não possui cadastro, deseja se cadastrar?")
-
-                        .setPositiveButton("SIM", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int with) {
-
-                                Intent intent = new Intent(MainActivity.this, CadastroActivity.class);
-                                intent.putExtra("KeyEmail", email);
-                                intent.putExtra("KeySenha", senha);
-                                intent.putExtra("KeyNome", nome);
-                                startActivity(intent);
-                            }
-                        })
-
-                .setNegativeButton("NÃO", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int with) {
-
-                        Toast.makeText(getApplicationContext(),
-                                "Acesso Bloqueado",
-                                Toast.LENGTH_LONG).show();
-                    }
-                })
-                .setIcon(android.R.drawable.ic_delete)
-                .show();
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Falha no cadastro!"+ t.getLocalizedMessage() + ";" + t.getCause(), Toast.LENGTH_SHORT).show();
             }
         });
+
+    }
+
+    private void dialog(){
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("ATENÇÃO!")
+                .setMessage("Realize seu cadastro!")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).setIcon(android.R.drawable.ic_delete)
+                .show();
     }
 }

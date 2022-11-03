@@ -2,10 +2,10 @@ package com.ibm.myfirstapp.data.remote.requests;
 
 public class LoginUser {
     private String email;
-    private String senha;
+    private String password;
 
-    public LoginUser(String email, String senha) {
+    public LoginUser(String email, String password) {
         this.email = email;
-        this.senha = senha;
+        this.password = password;
     }
 }
